@@ -1,21 +1,26 @@
-from repeatbot.recorder import KeyboardRecorder, MouseRecorder
-from repeatbot.common import Event
+from repeatbot import KeyboardRecorder, MouseRecorder, EventsImporter, EventsExporter, Repeater
 import time
-import csv
 
+# Record events
 mouseRecorder = MouseRecorder()
 keyboardRecorder = KeyboardRecorder()
+
 mouseRecorder.start()
 keyboardRecorder.start()
-print("Started")
-time.sleep(3)
+print("Started recording")
+
+time.sleep(10)
+
 mouseRecorder.stop()
 keyboardRecorder.stop()
-print("Stopped")
-keyboardRecorder.saveEvents('out.csv')
+print("Stopped recording")
 
-with open('out.csv', 'r') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        e = Event.fromCsvRow(row)
-    
+# Export and Import recorded keyboard events
+EventsExporter.exportEvents(keyboardRecorder.events, "events.csv")
+events = EventsImporter.importEvents("events.csv")
+
+# Repeat keyboard events
+print("Repeating events")
+repeater = Repeater()
+repeater.repeatEvents(events)
+print("Done")

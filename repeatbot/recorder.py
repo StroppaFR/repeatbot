@@ -1,5 +1,4 @@
 import pynput
-import csv
 from datetime import datetime
 from .common import Event, EventKind
 
@@ -11,12 +10,13 @@ class KeyboardRecorder:
         self.events = []
 
     def on_press(self, key):
-        self.events.append(Event(datetime.now(), EventKind.KEY_PRESS, [key]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.KEY_PRESS, [key]))
 
     def on_release(self, key):
-        self.events.append(Event(datetime.now(), EventKind.KEY_RELEASE, [key]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.KEY_RELEASE, [key]))
 
     def start(self):
+        self.basetime = datetime.now()
         self.listener = pynput.keyboard.Listener(
                 on_press=self.on_press if self.recordPress else None,
                 on_release=self.on_release if self.recordRelease else None)
@@ -24,12 +24,10 @@ class KeyboardRecorder:
 
     def stop(self):
         self.listener.stop()
+        self.listener = None
 
-    def saveEvents(self, filename):
-        with open(filename, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            for event in self.events:
-                writer.writerow(event.asCsvRow())
+    def clear(self):
+        self.events = []
 
 class MouseRecorder:
     def __init__(self):
@@ -40,15 +38,16 @@ class MouseRecorder:
         self.events = []
 
     def on_move(self, x, y):
-       self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y]))
+       self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y]))
 
     def on_click(self, x, y, button, pressed):
-        self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y, button, pressed]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y, button, pressed]))
 
     def on_scroll(self, x, y, dx, dy):
-        self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y, dx, dy]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y, dx, dy]))
 
     def start(self):
+        self.basetime = datetime.now()
         self.listener = pynput.mouse.Listener(
                 on_move=self.on_move if self.recordMove else None,
                 on_click=self.on_click if self.recordClick else None,
@@ -57,3 +56,7 @@ class MouseRecorder:
 
     def stop(self):
         self.listener.stop()
+        self.listener = None
+    
+    def clear(self):
+        self.events = []

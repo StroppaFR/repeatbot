@@ -1,4 +1,5 @@
-from datetime import datetime
+import csv
+from datetime import timedelta
 from enum import Enum
 from pynput.keyboard import Key, KeyCode
 
@@ -25,7 +26,7 @@ class Event:
         self.time = self.time - t0
 
     def asCsvRow(self):
-        row = [datetime.timestamp(self.time), self.kind.name]
+        row = [self.time.total_seconds(), self.kind.name]
         for d in self.data:
             if type(d) is Key:
                 row.append(EventParamType.KEY.name)
@@ -41,7 +42,7 @@ class Event:
     
     @staticmethod
     def fromCsvRow(row):
-        time = datetime.fromtimestamp(float(row[0]))
+        time = timedelta(seconds=float(row[0]))
         kind = EventKind[row[1]]
         if kind in [EventKind.KEY_PRESS, EventKind.KEY_RELEASE]:
             paramType = EventParamType[row[2]]
@@ -53,3 +54,22 @@ class Event:
             elif paramType == EventParamType.KEYCODE_VK:
                 data = [KeyCode.from_vk(int(param))]
         return Event(time, kind, data)
+
+class EventsExporter:
+    @staticmethod
+    def exportEvents(events, filename):
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for event in events:
+                writer.writerow(event.asCsvRow())
+
+class EventsImporter:
+    @staticmethod
+    def importEvents(filename):
+        events = []
+        with open(filename, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                e = Event.fromCsvRow(row)
+                events.append(e)
+        return events
