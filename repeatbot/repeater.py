@@ -24,3 +24,17 @@ class Repeater:
                 elif event.kind == EventKind.KEY_RELEASE:
                     key = event.data[0]
                     self.keyboard.release(key)
+                elif event.kind == EventKind.MOUSE_MOVE:
+                    x, y = event.data
+                    self.mouse.position = (x, y)
+                elif event.kind == EventKind.MOUSE_CLICK:
+                    x, y, button, pressed = event.data
+                    self.mouse.position = (x, y)
+                    if pressed:
+                        self.mouse.press(button)
+                    else:
+                        self.mouse.release(button)
+                elif event.kind == EventKind.MOUSE_SCROLL:
+                    x, y, dx, dy = event.data
+                    self.mouse.position = (x, y)
+                    self.mouse.scroll(dx, dy)

@@ -2,16 +2,16 @@ import csv
 from datetime import timedelta
 from enum import Enum
 from pynput.keyboard import Key, KeyCode
+from pynput.mouse import Button
 
 class EventKind(Enum):
     KEY_PRESS = 0
     KEY_RELEASE = 1
     MOUSE_MOVE = 2
-    MOUSE_PRESS = 3
-    MOUSE_RELEASE = 4
-    MOUSE_SCROLL = 5
+    MOUSE_CLICK = 3
+    MOUSE_SCROLL = 4
 
-class EventParamType(Enum):
+class KeyParamType(Enum):
     KEY = 0
     KEYCODE_CHAR = 1
     KEYCODE_VK = 2
@@ -29,15 +29,19 @@ class Event:
         row = [self.time.total_seconds(), self.kind.name]
         for d in self.data:
             if type(d) is Key:
-                row.append(EventParamType.KEY.name)
+                row.append(KeyParamType.KEY.name)
                 row.append(d.name)
             elif type(d) is KeyCode:
                 if d.char is not None:
-                    row.append(EventParamType.KEYCODE_CHAR.name)
+                    row.append(KeyParamType.KEYCODE_CHAR.name)
                     row.append(d.char)
                 elif d.vk is not None:
-                    row.append(EventParamType.KEYCODE_VK.name)
+                    row.append(KeyParamType.KEYCODE_VK.name)
                     row.append(d.vk)
+            elif type(d) is Button:
+                row.append(d.name)
+            else:
+                row.append(d)
         return row
     
     @staticmethod
@@ -45,14 +49,22 @@ class Event:
         time = timedelta(seconds=float(row[0]))
         kind = EventKind[row[1]]
         if kind in [EventKind.KEY_PRESS, EventKind.KEY_RELEASE]:
-            paramType = EventParamType[row[2]]
-            param = row[3]
-            if paramType == EventParamType.KEY:
+            paramType, param = KeyParamType[row[2]], row[3]
+            if paramType == KeyParamType.KEY:
                 data = [Key[param]]
-            elif paramType == EventParamType.KEYCODE_CHAR:
+            elif paramType == KeyParamType.KEYCODE_CHAR:
                 data = [KeyCode.from_char(param)]
-            elif paramType == EventParamType.KEYCODE_VK:
+            elif paramType == KeyParamType.KEYCODE_VK:
                 data = [KeyCode.from_vk(int(param))]
+        elif kind == EventKind.MOUSE_MOVE:
+            x, y = int(row[2]), int(row[3])
+            data = [x, y]
+        elif kind == EventKind.MOUSE_CLICK:
+            x, y, button, pressed = int(row[2]), int(row[3]), Button[row[4]], row[5] == "True"
+            data = [x, y, button, pressed]
+        elif kind == EventKind.MOUSE_SCROLL:
+            x, y, dx, dy = int(row[2]), int(row[3]), int(row[4]), int(row[5])
+            data = [x, y, dx, dy]
         return Event(time, kind, data)
 
 class EventsExporter:

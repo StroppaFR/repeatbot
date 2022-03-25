@@ -38,13 +38,13 @@ class MouseRecorder:
         self.events = []
 
     def on_move(self, x, y):
-       self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y]))
 
     def on_click(self, x, y, button, pressed):
-        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y, button, pressed]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_CLICK, [x, y, button, pressed]))
 
     def on_scroll(self, x, y, dx, dy):
-        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_MOVE, [x, y, dx, dy]))
+        self.events.append(Event(datetime.now() - self.basetime, EventKind.MOUSE_SCROLL, [x, y, dx, dy]))
 
     def start(self):
         self.basetime = datetime.now()

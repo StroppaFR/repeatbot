@@ -15,11 +15,13 @@ mouseRecorder.stop()
 keyboardRecorder.stop()
 print("Stopped recording")
 
-# Export and Import recorded keyboard events
-EventsExporter.exportEvents(keyboardRecorder.events, "events.csv")
-events = EventsImporter.importEvents("events.csv")
+# Export and import recorded events
+EventsExporter.exportEvents(keyboardRecorder.events, "keyboard.csv")
+EventsExporter.exportEvents(mouseRecorder.events, "mouse.csv")
+events = EventsImporter.importEvents("keyboard.csv")
+events.extend(EventsImporter.importEvents("mouse.csv"))
 
-# Repeat keyboard events
+# Repeat events
 print("Repeating events")
 repeater = Repeater()
 repeater.repeatEvents(events)
