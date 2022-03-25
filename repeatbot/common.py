@@ -28,13 +28,28 @@ class Event:
         row = [datetime.timestamp(self.time), self.kind.name]
         for d in self.data:
             if type(d) is Key:
-                row.append(EventParamType.KEY)
+                row.append(EventParamType.KEY.name)
                 row.append(d.name)
             elif type(d) is KeyCode:
                 if d.char is not None:
-                    row.append(EventParamType.KEYCODE_CHAR)
+                    row.append(EventParamType.KEYCODE_CHAR.name)
                     row.append(d.char)
-                else:
-                    row.append(EventParamType.KEYCODE_VK)
+                elif d.vk is not None:
+                    row.append(EventParamType.KEYCODE_VK.name)
                     row.append(d.vk)
         return row
+    
+    @staticmethod
+    def fromCsvRow(row):
+        time = datetime.fromtimestamp(float(row[0]))
+        kind = EventKind[row[1]]
+        if kind in [EventKind.KEY_PRESS, EventKind.KEY_RELEASE]:
+            paramType = EventParamType[row[2]]
+            param = row[3]
+            if paramType == EventParamType.KEY:
+                data = [Key[param]]
+            elif paramType == EventParamType.KEYCODE_CHAR:
+                data = [KeyCode.from_char(param)]
+            elif paramType == EventParamType.KEYCODE_VK:
+                data = [KeyCode.from_vk(int(param))]
+        return Event(time, kind, data)
