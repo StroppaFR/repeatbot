@@ -1,5 +1,7 @@
 import pynput
+import csv
 from datetime import datetime
+from .common import Event, EventKind
 
 class KeyboardRecorder:
     def __init__(self):
@@ -9,12 +11,10 @@ class KeyboardRecorder:
         self.events = []
 
     def on_press(self, key):
-        t = datetime.now()
-        print(t, key)
+        self.events.append(Event(datetime.now(), EventKind.KEY_PRESS, [key]))
 
     def on_release(self, key):
-        t = datetime.now()
-        print(t, key)
+        self.events.append(Event(datetime.now(), EventKind.KEY_RELEASE, [key]))
 
     def start(self):
         self.listener = pynput.keyboard.Listener(
@@ -25,6 +25,12 @@ class KeyboardRecorder:
     def stop(self):
         self.listener.stop()
 
+    def saveEvents(self, filename):
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for event in self.events:
+                writer.writerow(event.asCsvRow())
+
 class MouseRecorder:
     def __init__(self):
         self.recordMove = True
@@ -34,16 +40,13 @@ class MouseRecorder:
         self.events = []
 
     def on_move(self, x, y):
-        t = datetime.now()
-        print(t, x, y)
+       self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y]))
 
     def on_click(self, x, y, button, pressed):
-        t = datetime.now()
-        print(t, x, y, button, pressed)
+        self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y, button, pressed]))
 
     def on_scroll(self, x, y, dx, dy):
-        t = datetime.now()
-        print(t, x, y, dx, dy)
+        self.events.append(Event(datetime.now(), EventKind.MOUSE_MOVE, [x, y, dx, dy]))
 
     def start(self):
         self.listener = pynput.mouse.Listener(

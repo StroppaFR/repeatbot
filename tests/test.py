@@ -2,12 +2,12 @@ from repeatbot.recorder import KeyboardRecorder, MouseRecorder
 import time
 
 mouseRecorder = MouseRecorder()
-keybardRecorder = KeyboardRecorder()
+keyboardRecorder = KeyboardRecorder()
 mouseRecorder.start()
-keybardRecorder.start()
+keyboardRecorder.start()
 print("Started")
 time.sleep(3)
 mouseRecorder.stop()
-keybardRecorder.stop()
+keyboardRecorder.stop()
 print("Stopped")
-time.sleep(3)
+keyboardRecorder.saveEvents('out.csv')
